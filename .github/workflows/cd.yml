@@ -1,4 +1,4 @@
-name: deploy
+name: Deploy FastAPI App to EC2
 
 on:
   push:
@@ -23,12 +23,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Deploy to AWS EC2 (SSH)
+      - name: Decode AWS SSH Key
+        run: |
+          echo "${{ secrets.AWS_SSH_KEY }}" | base64 -d > private-key.pem
+          chmod 600 private-key.pem
+
+      - name: Deploy to EC2 (SSH)
         uses: appleboy/ssh-action@v0.1.0
         with:
           host: ${{ secrets.AWS_HOST }}
           username: ${{ secrets.AWS_USERNAME }}
-          key: ${{ secrets.AWS_SSH_KEY }}
+          key_path: private-key.pem
           script: |
             cd fastapi-app
             git pull origin main
