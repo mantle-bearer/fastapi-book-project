@@ -30,7 +30,7 @@ jobs:
           username: ${{ secrets.AWS_USERNAME }}
           key: ${{ secrets.AWS_SSH_KEY }}
           script: |
-            cd fastapi-book-project
+            cd fastapi-app
             git pull origin main
             source venv/bin/activate
             pip install -r requirements.txt
