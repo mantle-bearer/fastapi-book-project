@@ -51,6 +51,7 @@ async def get_books() -> OrderedDict[int, Book]:
 @router.get("/{book_id}", response_model=Book, status_code=status.HTTP_200_OK)
 async def get_book_by_id(book_id: int):
     book = db.books.get(book_id)
+    #ternary operator to check for book and return it or return 404 response
     return book if book is not None else JSONResponse(status_code=404, content={"detail": "Book not found"})
 
 
