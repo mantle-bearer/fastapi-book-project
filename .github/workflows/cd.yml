@@ -5,32 +5,32 @@ on:
     branches: [main]
 
 jobs:
-  deploy:
+  server_update:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Fetch Repository Code
         uses: actions/checkout@v3
 
-      - name: Deploy via SSH
+      - name: Remote Deployment via SSH
         env:
-          PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
-          HOST: ${{ secrets.EC2_HOST }}
-          USER: ubuntu
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          SERVER_IP: ${{ secrets.EC2_HOST }}
+          REMOTE_USER: ubuntu
         run: |
-          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-            ssh -o StrictHostKeyChecking=no -i private_key $USER@$HOST << 'EOF'
+          echo "$SSH_PRIVATE_KEY" > ssh_key && chmod 600 ssh_key
+            ssh -o StrictHostKeyChecking=no -i ssh_key $REMOTE_USER@$SERVER_IP << 'CMD'
             cd fastapi-book-project
-            echo "Current directory: $(pwd)"
-            echo "Git remote configuration:"
+            echo "Currently inside: $(pwd)"
+            echo "Git Configuration:"
             git remote -v
-            echo "Fetching updates..."
+            echo "Syncing repository..."
             git fetch origin
-            echo "Pulling from main branch..."
-            git pull origin main || { echo "git pull failed"; exit 1; }
-            echo "Installing requirements..."
+            echo "Merging latest changes..."
+            git pull origin main || { echo "Error: git pull failed"; exit 1; }
+            echo "Updating dependencies..."
             source venv/bin/activate
             pip install -r requirements.txt
-            sudo systemctl restart fastapi_app
+            sudo systemctl restart fastapi_service
             sudo systemctl restart nginx
-          EOF
+          CMD
