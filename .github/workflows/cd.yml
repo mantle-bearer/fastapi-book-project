@@ -1,4 +1,4 @@
-name: deploy #automated deployment
+name: deploy
 
 on:
   push:
